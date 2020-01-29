@@ -3,7 +3,7 @@ import CocoaLumberjackSwift
 
 open class DNSSession {
     public let requestMessage: DNSMessage
-    var requestIPPacket: IPPacket?
+    open var requestIPPacket: IPPacket?
     open var realIP: IPAddress?
     open var fakeIP: IPAddress?
     open var realResponseMessage: DNSMessage?

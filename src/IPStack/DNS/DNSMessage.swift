@@ -20,7 +20,7 @@ open class DNSMessage {
 
     open var payload: Data!
 
-    var bytesLength: Int {
+    open var bytesLength: Int {
         var len = 12 + queries.reduce(0) {
             $0 + $1.bytesLength
         }
@@ -36,7 +36,7 @@ open class DNSMessage {
         return len
     }
 
-    var resolvedIPv4Address: IPAddress? {
+    open var resolvedIPv4Address: IPAddress? {
         for answer in answers {
             if let address = answer.ipv4Address {
                 return address
@@ -45,13 +45,13 @@ open class DNSMessage {
         return nil
     }
 
-    var type: DNSType? {
+    open var type: DNSType? {
         return queries.first?.type
     }
 
-    init() {}
+    public init() {}
 
-    init?(payload: Data) {
+    public init?(payload: Data) {
         self.payload = payload
         let scanner = BinaryDataScanner(data: payload, littleEndian: false)
 
@@ -106,7 +106,7 @@ open class DNSMessage {
 
     }
 
-    func buildMessage() -> Bool {
+    public func buildMessage() -> Bool {
         payload = Data(count: bytesLength)
         if transactionID == 0 {
             transactionID = UInt16(arc4random_uniform(UInt32(UInt16.max)))
@@ -141,14 +141,14 @@ open class DNSMessage {
     }
 
     // swiftlint:disable variable_name
-    func setPayloadWithUInt8(_ value: UInt8, at: Int) {
+    public func setPayloadWithUInt8(_ value: UInt8, at: Int) {
         var v = value
         withUnsafeBytes(of: &v) {
             payload.replaceSubrange(at..<at+1, with: $0)
         }
     }
 
-    func setPayloadWithUInt16(_ value: UInt16, at: Int, swap: Bool = false) {
+    public func setPayloadWithUInt16(_ value: UInt16, at: Int, swap: Bool = false) {
         var v: UInt16
         if swap {
             v = NSSwapHostShortToBig(value)
@@ -160,7 +160,7 @@ open class DNSMessage {
         }
     }
 
-    func setPayloadWithUInt32(_ value: UInt32, at: Int, swap: Bool = false) {
+    public func setPayloadWithUInt32(_ value: UInt32, at: Int, swap: Bool = false) {
         var v: UInt32
         if swap {
             v = NSSwapHostIntToBig(value)
@@ -172,7 +172,7 @@ open class DNSMessage {
         }
     }
 
-    func setPayloadWithData(_ data: Data, at: Int, length: Int? = nil, from: Int = 0) {
+    public func setPayloadWithData(_ data: Data, at: Int, length: Int? = nil, from: Int = 0) {
         let length = length ?? data.count - from
 
         payload.withUnsafeMutableBytes { ptr in
@@ -180,11 +180,11 @@ open class DNSMessage {
         }
     }
 
-    func resetPayloadAt(_ at: Int, length: Int) {
+    public func resetPayloadAt(_ at: Int, length: Int) {
         payload.resetBytes(in: at..<at+length)
     }
 
-    fileprivate func writeAllRecordAt(_ at: Int) -> Bool {
+    public func writeAllRecordAt(_ at: Int) -> Bool {
         var position = at
         for query in queries {
             guard writeDNSQuery(query, at: position) else {
@@ -203,7 +203,7 @@ open class DNSMessage {
         return true
     }
 
-    fileprivate func writeDNSQuery(_ query: DNSQuery, at: Int) -> Bool {
+    public func writeDNSQuery(_ query: DNSQuery, at: Int) -> Bool {
         guard DNSNameConverter.setName(query.name, toData: &payload!, at: at) else {
             return false
         }
@@ -212,7 +212,7 @@ open class DNSMessage {
         return true
     }
 
-    fileprivate func writeDNSResource(_ resource: DNSResource, at: Int) -> Bool {
+    public func writeDNSResource(_ resource: DNSResource, at: Int) -> Bool {
         guard DNSNameConverter.setName(resource.name, toData: &payload!, at: at) else {
             return false
         }
@@ -231,14 +231,14 @@ open class DNSQuery {
     public let klass: DNSClass
     let nameBytesLength: Int
 
-    init(name: String, type: DNSType = .a, klass: DNSClass = .internet) {
+    public init(name: String, type: DNSType = .a, klass: DNSClass = .internet) {
         self.name = name.trimmingCharacters(in: CharacterSet(charactersIn: "."))
         self.type = type
         self.klass = klass
         self.nameBytesLength = name.utf8.count + 2
     }
 
-    init?(payload: Data, offset: Int, base: Int = 0) {
+    public init?(payload: Data, offset: Int, base: Int = 0) {
         (self.name, self.nameBytesLength) = DNSNameConverter.getNamefromData(payload, offset: offset, base: base)
 
         let scanner = BinaryDataScanner(data: payload, littleEndian: false)
@@ -258,7 +258,7 @@ open class DNSQuery {
 
     }
 
-    var bytesLength: Int {
+    public var bytesLength: Int {
         return nameBytesLength + 4
     }
 }
@@ -273,7 +273,7 @@ open class DNSResource {
 
     let nameBytesLength: Int
 
-    init(name: String, type: DNSType = .a, klass: DNSClass = .internet, TTL: UInt32 = 300, data: Data) {
+    public init(name: String, type: DNSType = .a, klass: DNSClass = .internet, TTL: UInt32 = 300, data: Data) {
         self.name = name
         self.type = type
         self.klass = klass
@@ -287,7 +287,7 @@ open class DNSResource {
         return DNSResource(name: name, type: .a, klass: .internet, TTL: TTL, data: address.dataInNetworkOrder)
     }
 
-    init?(payload: Data, offset: Int, base: Int = 0) {
+    public init?(payload: Data, offset: Int, base: Int = 0) {
         (self.name, self.nameBytesLength) = DNSNameConverter.getNamefromData(payload, offset: offset, base: base)
 
         let scanner = BinaryDataScanner(data: payload, littleEndian: false)
@@ -309,11 +309,11 @@ open class DNSResource {
         self.data = payload.subdata(in: scanner.position..<scanner.position+Int(dataLength))
     }
 
-    var bytesLength: Int {
+    public var bytesLength: Int {
         return nameBytesLength + 10 + Int(dataLength)
     }
 
-    var ipv4Address: IPAddress? {
+    public var ipv4Address: IPAddress? {
         guard type == .a else {
             return nil
         }
@@ -321,7 +321,7 @@ open class DNSResource {
     }
 }
 
-class DNSNameConverter {
+public class DNSNameConverter {
     static func setName(_ name: String, toData data: inout Data, at: Int) -> Bool {
         let labels = name.components(separatedBy: CharacterSet(charactersIn: "."))
         var position = at

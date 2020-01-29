@@ -1,6 +1,6 @@
 import Foundation
 
-protocol TransportProtocolParserProtocol {
+public protocol TransportProtocolParserProtocol {
     var packetData: Data! { get set }
 
     var offset: Int { get set }
@@ -13,30 +13,30 @@ protocol TransportProtocolParserProtocol {
 }
 
 /// Parser to process UDP packet and build packet.
-class UDPProtocolParser: TransportProtocolParserProtocol {
+open class UDPProtocolParser: TransportProtocolParserProtocol {
     /// The source port.
-    var sourcePort: Port!
+    public var sourcePort: Port!
 
     /// The destination port.
-    var destinationPort: Port!
+    public var destinationPort: Port!
 
     /// The data containing the UDP segment.
-    var packetData: Data!
+    public var packetData: Data!
 
     /// The offset of the UDP segment in the `packetData`.
-    var offset: Int = 0
+    public var offset: Int = 0
 
     /// The payload to be encapsulated.
-    var payload: Data!
+    public var payload: Data!
 
     /// The length of the UDP segment.
-    var bytesLength: Int {
+    public var bytesLength: Int {
         return payload.count + 8
     }
 
     init() {}
 
-    init?(packetData: Data, offset: Int) {
+    public init?(packetData: Data, offset: Int) {
         guard packetData.count >= offset + 8 else {
             return nil
         }
@@ -50,7 +50,7 @@ class UDPProtocolParser: TransportProtocolParserProtocol {
         payload = packetData.subdata(in: offset+8..<packetData.count)
     }
 
-    func buildSegment(_ pseudoHeaderChecksum: UInt32) {
+    public func buildSegment(_ pseudoHeaderChecksum: UInt32) {
         sourcePort.withUnsafeBufferPointer {
             self.packetData.replaceSubrange(offset..<offset+2, with: $0)
         }
