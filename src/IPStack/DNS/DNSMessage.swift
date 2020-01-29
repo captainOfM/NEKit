@@ -18,7 +18,7 @@ open class DNSMessage {
     open var nameservers: [DNSResource] = []
     open var addtionals: [DNSResource] = []
 
-    var payload: Data!
+    open var payload: Data!
 
     var bytesLength: Int {
         var len = 12 + queries.reduce(0) {
