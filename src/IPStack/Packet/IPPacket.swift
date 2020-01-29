@@ -179,7 +179,7 @@ open class IPPacket {
     /**
      Initailize a new instance to build IP packet.
      */
-    init() {}
+    public init() {}
     
     /**
      Initailize an `IPPacket` with data.
