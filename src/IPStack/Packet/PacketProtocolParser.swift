@@ -34,7 +34,7 @@ open class UDPProtocolParser: TransportProtocolParserProtocol {
         return payload.count + 8
     }
 
-    init() {}
+    public init() {}
 
     public init?(packetData: Data, offset: Int) {
         guard packetData.count >= offset + 8 else {
