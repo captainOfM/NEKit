@@ -99,10 +99,10 @@ open class DNSMessage {
             scanner.advance(by: nameservers.last!.bytesLength)
         }
 
-//        for _ in 0..<addtionalCount {
-//            addtionals.append(DNSResource(payload: payload, offset: scanner.position, base: 0)!)
-//            scanner.advance(by: addtionals.last!.bytesLength)
-//        }
+        for _ in 0..<addtionalCount {
+            addtionals.append(DNSResource(payload: payload, offset: scanner.position, base: 0)!)
+            scanner.advance(by: addtionals.last!.bytesLength)
+        }
 
     }
 
